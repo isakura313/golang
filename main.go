@@ -1,19 +1,19 @@
-package main
+package main // название нашего замечательного пакета
 
 import (
-	"database/sql"
+	"database/sql"  // основной плагин для использования sql
 	"encoding/json" // Для корректной работы с json
 	"fmt"           // библиотека для вывода
 	"log"           // для логирования
 	"net/http"      // и для обработки http запросов
 
-	_ "github.com/go-sql-driver/mysql"
-	"github.com/gorilla/mux" //http роутер  и диспатчер
+	_ "github.com/go-sql-driver/mysql" //драйвер для работы нашего sql
+	"github.com/gorilla/mux"           //http роутер  и диспатчер
 )
 
 type Article struct {
-	Title   string `json:"Title"`
 	ID      int    `json: id`
+	Title   string `json:"Title"`
 	Desc    string `json:"desc"`
 	Content string `json:"Content"`
 }
@@ -23,11 +23,11 @@ type Articles []Article
 func allArticles(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	articles := Articles{
-		Article{Title: "О дельфинах", ID: 1, Desc: "дельфинчики клевые", Content: "Дельфи́ны — водные млекопитающие отряда китообразных, принадлежащие либо к семейству дельфиновых — морские, либо к надсемейству речных дельфинов — пресноводные."},
-		Article{Title: "О пингвинах", ID: 2, Desc: "Пингвины классные", Content: "Пингви́новые, или пингви́ны, — семейство нелетающих морских птиц, единственное современное в отряде пингвинообра́зных."},
-	}
-
+	sql := "SELECT * from shop where id = ?"
+	rows, err := getJSON(sql, "3")
+	log.Println(rows)
+	log.Println(err)
+	articles := rows
 	fmt.Println("Endpoint Hit:All articles")
 	json.NewEncoder(w).Encode(articles)
 }
@@ -48,40 +48,51 @@ func handleRequests() {
 	log.Fatal(http.ListenAndServe(":8801", myRouter))
 }
 
-type User struct {
-	id   int
-	Name string
-}
-
-func main() {
-	// handleRequests()
-	// sqlConnString := getConnString()
+func getJSON(sqlString string, taskID string) (string, error) {
 	db, err := sql.Open("mysql", "pavel:@tcp(127.0.0.1:3306)/testdb")
-	// db, err := sql.Open("mysql", "pavel:@/root1")
 	if err != nil {
 		panic(err.Error()) // Just for example purpose. You should use proper error handling instead of panic
 	}
+	defer db.Close()
 
-	stmtIns, err := db.Prepare("INSERT INTO shop VALUES ('Pavel',1)") // ? = placeholder
+	rows, err := db.Query(sqlString, taskID)
 	if err != nil {
-		panic(err.Error()) // proper error handling instead of panic in your app
+		return "", err
 	}
-	defer stmtIns.Close() // Close the statement when we leave main() / the program terminates
-
-	rows, err := db.Query("SELECT Name FROM shop")
+	columns, err := rows.Columns()
 	if err != nil {
-		panic(err.Error()) // proper error handling instead of panic in your app
+		return "", err
 	}
-
+	count := len(columns)
+	tableData := make([]map[string]interface{}, 0)
+	values := make([]interface{}, count)
+	valuePtrs := make([]interface{}, count)
 	for rows.Next() {
-		var user User
-
-		err = rows.Scan(&user.Name)
-		if err != nil {
-			panic(err.Error()) // proper error handling instead of panic in your app
+		for i := 0; i < count; i++ {
+			valuePtrs[i] = &values[i]
 		}
-
-		fmt.Println(user.Name)
+		rows.Scan(valuePtrs...)
+		entry := make(map[string]interface{})
+		for i, col := range columns {
+			var v interface{}
+			val := values[i]
+			b, ok := val.([]byte)
+			if ok {
+				v = string(b)
+			} else {
+				v = val
+			}
+			entry[col] = v
+		}
+		tableData = append(tableData, entry)
 	}
-	defer rows.Close()
+	jsonData, err := json.Marshal(tableData)
+	if err != nil {
+		return "", err
+	}
+	return string(jsonData), nil
+}
+
+func main() {
+	handleRequests()
 }
