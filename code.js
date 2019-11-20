@@ -1,5 +1,8 @@
+
+//  здесь у меня класс конструктор, если пользователь захотел создать свою статью, это у него получилось без проблем
 class Article {
-    constructor(title, desc, content) {
+    constructor(title, id, desc, content) {
+        this.id = id;
         this.title = title;
         this.desc = desc;
         this.content = content;
@@ -11,45 +14,43 @@ let root = document.querySelector("#root");
 
 function draw(obj) {
     root.insertAdjacentHTML("beforebegin", `
-    <div>
-    <h3> ${obj.title}</h3>
-    <h5> ${obj.desc} </h5>
-    <p> 
-    ${obj.content} 
+    <div class="article" id= ${obj.id}>
+    <h1 class="article__h1"> ${obj.Title}</h1>
+    <h3 class="article__h3"> ${obj.desc} </h3>
+    <p class="article__p"> 
+    ${obj.Content} 
     </p>
     </div>
     `)
-
 };
 
 
-// let article = JSON.parse(http://localhost:8801/articles.responseText);
+
+async function f() {
+    let response = await fetch('http://localhost:8801/articles');
+
+    if (response.ok) { // если HTTP-статус в диапазоне 200-299
+        // получаем тело ответа (см. про этот метод ниже)
+        let json = await response.json();
+        //   let text = await response.text(); // прочитать тело ответа как текст
+
+        console.log(json);
+        // let value = JSON.parse(json);
+        console.log(typeof(json));
+        console.log(json[0])
+        // draw(json[0]);
+        return json[0];
+    } else {
+        alert("Ошибка HTTP: " + response.status);
+    }
+
+}
 
 
-// (async() => {
-//     console.log('before start');
-  
-//     const response = await fetch('http://localhost:8801/articles')
-//     const myJson = await response.json();
-//     console.log(JSON.stringify(myJson));
-    
-//     console.log('after start');
-//   })();
-fetch('http://localhost:8801/articles')
-  .then(response => response.json())
-  .then(json => console.log(json))
 
-// var invocation = new XMLHttpRequest();
-// var url = 'http://localhost:8801/articles';
-   
-// function callOtherDomain() {
-//   if(invocation) {    
-//     invocation.open('GET', url, true);
-//     invocation.onreadystatechange = handler;
-//     invocation.send(); 
-//   }
-// }
 
-// window.onload = function(){
-// draw(article);
-// }
+
+// draw(f());
+// console.log(r);
+// draw(r);
+

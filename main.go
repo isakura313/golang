@@ -11,6 +11,7 @@ import (
 
 type Article struct {
 	Title   string `json:"Title"`
+	ID      int    `json: id`
 	Desc    string `json:"desc"`
 	Content string `json:"Content"`
 }
@@ -18,8 +19,11 @@ type Article struct {
 type Articles []Article
 
 func allArticles(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	articles := Articles{
-		Article{Title: "О дельфинах", Desc: "дельфинчики клевые", Content: "Дельфинчики просто супер"},
+		Article{Title: "О дельфинах", ID: 1, Desc: "дельфинчики клевые", Content: "Дельфи́ны — водные млекопитающие отряда китообразных, принадлежащие либо к семейству дельфиновых — морские, либо к надсемейству речных дельфинов — пресноводные."},
+		Article{Title: "О пингвинах", ID: 2, Desc: "Пингвины классные", Content: "Пингви́новые, или пингви́ны, — семейство нелетающих морских птиц, единственное современное в отряде пингвинообра́зных."},
 	}
 
 	fmt.Println("Endpoint Hit:All articles")
