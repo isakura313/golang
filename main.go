@@ -1,11 +1,13 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json" // Для корректной работы с json
 	"fmt"           // библиотека для вывода
 	"log"           // для логирования
 	"net/http"      // и для обработки http запросов
 
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux" //http роутер  и диспатчер
 )
 
@@ -46,6 +48,40 @@ func handleRequests() {
 	log.Fatal(http.ListenAndServe(":8801", myRouter))
 }
 
+type User struct {
+	id   int
+	Name string
+}
+
 func main() {
-	handleRequests()
+	// handleRequests()
+	// sqlConnString := getConnString()
+	db, err := sql.Open("mysql", "pavel:@tcp(127.0.0.1:3306)/testdb")
+	// db, err := sql.Open("mysql", "pavel:@/root1")
+	if err != nil {
+		panic(err.Error()) // Just for example purpose. You should use proper error handling instead of panic
+	}
+
+	stmtIns, err := db.Prepare("INSERT INTO shop VALUES ('Pavel',1)") // ? = placeholder
+	if err != nil {
+		panic(err.Error()) // proper error handling instead of panic in your app
+	}
+	defer stmtIns.Close() // Close the statement when we leave main() / the program terminates
+
+	rows, err := db.Query("SELECT Name FROM shop")
+	if err != nil {
+		panic(err.Error()) // proper error handling instead of panic in your app
+	}
+
+	for rows.Next() {
+		var user User
+
+		err = rows.Scan(&user.Name)
+		if err != nil {
+			panic(err.Error()) // proper error handling instead of panic in your app
+		}
+
+		fmt.Println(user.Name)
+	}
+	defer rows.Close()
 }
