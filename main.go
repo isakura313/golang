@@ -1,4 +1,4 @@
-package main // название нашего замечательного пакета
+package main
 
 import (
 	"database/sql"  // основной плагин для использования sql
@@ -23,8 +23,8 @@ type Articles []Article
 func allArticles(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	sql := "SELECT * from shop where id = ?"
-	rows, err := getJSON(sql, "3")
+	sql := "SELECT * from shop"
+	rows, err := getJSON(sql)
 	log.Println(rows)
 	log.Println(err)
 	articles := rows
@@ -48,14 +48,14 @@ func handleRequests() {
 	log.Fatal(http.ListenAndServe(":8801", myRouter))
 }
 
-func getJSON(sqlString string, taskID string) (string, error) {
+func getJSON(sqlString string) (string, error) {
 	db, err := sql.Open("mysql", "pavel:@tcp(127.0.0.1:3306)/testdb")
 	if err != nil {
 		panic(err.Error()) // Just for example purpose. You should use proper error handling instead of panic
 	}
 	defer db.Close()
 
-	rows, err := db.Query(sqlString, taskID)
+	rows, err := db.Query(sqlString)
 	if err != nil {
 		return "", err
 	}

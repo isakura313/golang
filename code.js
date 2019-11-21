@@ -36,10 +36,15 @@ async function f() {
 
         console.log(json);
         let value = JSON.parse(json);
-        console.log(typeof(json));
-        console.log(value[0])
-        draw(value[0]);
-        return json[0];
+        console.log(typeof(value));
+        console.log(value.length);
+        for (let i = 1; i < value.length; i++) {
+            draw(value[i]);
+            
+        }
+        // console.log(value[1])
+        
+        return json[1];
     } else {
         alert("Ошибка HTTP: " + response.status);
     }
@@ -50,7 +55,7 @@ async function f() {
 
 
 var r = f;
-draw(r);
+// draw(r);
 // console.log(r);f
 f();
 
