@@ -16,24 +16,21 @@ type Article struct {
 	Title   string `json:"Title"`
 	Desc    string `json:"desc"`
 	Content string `json:"Content"`
+	//классов нет но есть struct и они классные
 }
 
-type Articles []Article
+type Articles []Article // объявляем массив наших структов
 
 func allArticles(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	sql := "SELECT * from shop"
+	sql := "SELECT * from shop" //сложнейший sql не поддающийся никакому анализу
 	rows, err := getJSON(sql)
-	log.Println(rows)
+	log.Println(rows) // нужно для отладки и работы. Но вообще можно и удалить если что
 	log.Println(err)
 	articles := rows
 	fmt.Println("Endpoint Hit:All articles")
 	json.NewEncoder(w).Encode(articles)
-}
-func testPostArticles(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "<h1>test Post endpoint POST </h1>")
-
 }
 
 func homePage(w http.ResponseWriter, r *http.Request) {
@@ -44,14 +41,13 @@ func handleRequests() {
 	myRouter := mux.NewRouter().StrictSlash(true)
 	myRouter.HandleFunc("/", homePage)
 	myRouter.HandleFunc("/articles", allArticles).Methods("GET")
-	myRouter.HandleFunc("/articles", testPostArticles).Methods("Post")
 	log.Fatal(http.ListenAndServe(":8801", myRouter))
 }
 
 func getJSON(sqlString string) (string, error) {
 	db, err := sql.Open("mysql", "pavel:@tcp(127.0.0.1:3306)/testdb")
 	if err != nil {
-		panic(err.Error()) // Just for example purpose. You should use proper error handling instead of panic
+		panic(err.Error()) // panic относительно бесполезен. В реальности вам нужен другой перехватчик ошибок
 	}
 	defer db.Close()
 

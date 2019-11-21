@@ -1,14 +1,3 @@
-// alert("hello");
-//  здесь у меня класс конструктор, если пользователь захотел создать свою статью, это у него получилось без проблем
-class Article {
-    constructor(title, id, desc, content) {
-        this.id = id;
-        this.title = title;
-        this.desc = desc;
-        this.content = content;
-    }
-}
-
 
 let root = document.querySelector("#root");
 
@@ -29,8 +18,8 @@ function draw(obj) {
 async function f() {
     let response = await fetch('http://localhost:8801/articles');
 
-    if (response.ok) { // если HTTP-статус в диапазоне 200-299
-        // получаем тело ответа (см. про этот метод ниже)
+    if (response.ok) {
+
         let json = await response.json();
         //   let text = await response.text(); // прочитать тело ответа как текст
 
@@ -42,7 +31,6 @@ async function f() {
             draw(value[i]);
             
         }
-        // console.log(value[1])
         
         return json[1];
     } else {
@@ -53,9 +41,5 @@ async function f() {
 
 
 
-
-var r = f;
-// draw(r);
-// console.log(r);f
 f();
 
