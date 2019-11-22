@@ -34,7 +34,7 @@ func allArticles(w http.ResponseWriter, r *http.Request) {
 }
 
 func homePage(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "<h1>Наш сервер начал работу </h1>")
+	fmt.Fprint(w, "<h1>Элвис покинул здание</h1>")
 }
 
 func handleRequests() {
