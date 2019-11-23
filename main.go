@@ -31,7 +31,7 @@ func allArticles(w http.ResponseWriter, r *http.Request) {
 	// используется только в учебных целях, в профессиональной продакшене это, конечно, возможно стоит  поменять
 	sql := "SELECT * from articles" //выбрать все из таблицы articles
 	rows, err := getJSON(sql)
-	log.Println(err) 	
+	log.Println(err)
 	articles := rows
 	fmt.Println("Endpoint Hit:All articles")
 	json.NewEncoder(w).Encode(articles)
@@ -45,13 +45,13 @@ func handleRequests() {
 	myRouter := mux.NewRouter().StrictSlash(true)
 	myRouter.HandleFunc("/", homePage)
 	myRouter.HandleFunc("/articles", allArticles).Methods("GET")
-	log.Fatal(http.ListenAndServe(":8801", myRouter))
+	log.Println(http.ListenAndServe(":8810", myRouter))
 }
 
 func getJSON(sqlString string) (string, error) {
 	db, err := sql.Open("mysql", "pavel:@tcp(127.0.0.1:3306)/testdb")
 	if err != nil {
-		panic(err.Error()) // panic относительно бесполезен. В реальности вам нужен другой перехватчик ошибок
+		log.Println(err.Error()) 
 	}
 	defer db.Close()
 
