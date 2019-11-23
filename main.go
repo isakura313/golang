@@ -16,18 +16,22 @@ type Article struct {
 	Title   string `json:"Title"`
 	Desc    string `json:"desc"`
 	Content string `json:"Content"`
-	//классов нет но есть struct и они классные
+	//классов нет но есть struct и, и у них есть имя и поля, в которые можем вписать поля нашего объекта, используя struct как Конструктор
 }
 
-type Articles []Article // объявляем массив наших структов
+type Articles []Article // объявляем массив наших структов, что бы можно было складывать наши статьи
 
 func allArticles(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	// для того, что наше приложение могло отдать GET - запрос, нам нужно
+	// установить заголовки. Подробнее про них можно прочитать
+	//https://developer.mozilla.org/ru/docs/Web/HTTP/%D0%97%D0%B0%D0%B3%D0%BE%D0%BB%D0%BE%D0%B2%D0%BA%D0%B8
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	sql := "SELECT * from shop" //сложнейший sql не поддающийся никакому анализу
+	//если вкратче, данный заголовок открывает всем доступ к данному запросу.
+	// используется только в учебных целях, в профессиональной продакшене это, конечно, возможно стоит  поменять
+	sql := "SELECT * from articles" //выбрать все из таблицы articles
 	rows, err := getJSON(sql)
-	log.Println(rows) // нужно для отладки и работы. Но вообще можно и удалить если что
-	log.Println(err)
+	log.Println(err) 	
 	articles := rows
 	fmt.Println("Endpoint Hit:All articles")
 	json.NewEncoder(w).Encode(articles)
