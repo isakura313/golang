@@ -1,4 +1,4 @@
-
+// alert("hello");
 //  здесь у меня класс конструктор, если пользователь захотел создать свою статью, это у него получилось без проблем
 class Article {
     constructor(title, id, desc, content) {
@@ -16,7 +16,7 @@ function draw(obj) {
     root.insertAdjacentHTML("beforebegin", `
     <div class="article" id= ${obj.id}>
     <h1 class="article__h1"> ${obj.Title}</h1>
-    <h3 class="article__h3"> ${obj.desc} </h3>
+    <h3 class="article__h3"> ${obj.Desc} </h3>
     <p class="article__p"> 
     ${obj.Content} 
     </p>
@@ -35,10 +35,10 @@ async function f() {
         //   let text = await response.text(); // прочитать тело ответа как текст
 
         console.log(json);
-        // let value = JSON.parse(json);
+        let value = JSON.parse(json);
         console.log(typeof(json));
-        console.log(json[0])
-        // draw(json[0]);
+        console.log(value[0])
+        draw(value[0]);
         return json[0];
     } else {
         alert("Ошибка HTTP: " + response.status);
@@ -49,8 +49,8 @@ async function f() {
 
 
 
-
-// draw(f());
-// console.log(r);
-// draw(r);
+var r = f;
+draw(r);
+// console.log(r);f
+f();
 

@@ -1,17 +1,19 @@
-package main
+package main // название нашего замечательного пакета
 
 import (
+	"database/sql"  // основной плагин для использования sql
 	"encoding/json" // Для корректной работы с json
 	"fmt"           // библиотека для вывода
 	"log"           // для логирования
 	"net/http"      // и для обработки http запросов
 
-	"github.com/gorilla/mux" //http роутер  и диспатчер
+	_ "github.com/go-sql-driver/mysql" //драйвер для работы нашего sql
+	"github.com/gorilla/mux"           //http роутер  и диспатчер
 )
 
 type Article struct {
-	Title   string `json:"Title"`
 	ID      int    `json: id`
+	Title   string `json:"Title"`
 	Desc    string `json:"desc"`
 	Content string `json:"Content"`
 }
@@ -21,11 +23,11 @@ type Articles []Article
 func allArticles(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	articles := Articles{
-		Article{Title: "О дельфинах", ID: 1, Desc: "дельфинчики клевые", Content: "Дельфи́ны — водные млекопитающие отряда китообразных, принадлежащие либо к семейству дельфиновых — морские, либо к надсемейству речных дельфинов — пресноводные."},
-		Article{Title: "О пингвинах", ID: 2, Desc: "Пингвины классные", Content: "Пингви́новые, или пингви́ны, — семейство нелетающих морских птиц, единственное современное в отряде пингвинообра́зных."},
-	}
-
+	sql := "SELECT * from shop where id = ?"
+	rows, err := getJSON(sql, "3")
+	log.Println(rows)
+	log.Println(err)
+	articles := rows
 	fmt.Println("Endpoint Hit:All articles")
 	json.NewEncoder(w).Encode(articles)
 }
@@ -44,6 +46,51 @@ func handleRequests() {
 	myRouter.HandleFunc("/articles", allArticles).Methods("GET")
 	myRouter.HandleFunc("/articles", testPostArticles).Methods("Post")
 	log.Fatal(http.ListenAndServe(":8801", myRouter))
+}
+
+func getJSON(sqlString string, taskID string) (string, error) {
+	db, err := sql.Open("mysql", "pavel:@tcp(127.0.0.1:3306)/testdb")
+	if err != nil {
+		panic(err.Error()) // Just for example purpose. You should use proper error handling instead of panic
+	}
+	defer db.Close()
+
+	rows, err := db.Query(sqlString, taskID)
+	if err != nil {
+		return "", err
+	}
+	columns, err := rows.Columns()
+	if err != nil {
+		return "", err
+	}
+	count := len(columns)
+	tableData := make([]map[string]interface{}, 0)
+	values := make([]interface{}, count)
+	valuePtrs := make([]interface{}, count)
+	for rows.Next() {
+		for i := 0; i < count; i++ {
+			valuePtrs[i] = &values[i]
+		}
+		rows.Scan(valuePtrs...)
+		entry := make(map[string]interface{})
+		for i, col := range columns {
+			var v interface{}
+			val := values[i]
+			b, ok := val.([]byte)
+			if ok {
+				v = string(b)
+			} else {
+				v = val
+			}
+			entry[col] = v
+		}
+		tableData = append(tableData, entry)
+	}
+	jsonData, err := json.Marshal(tableData)
+	if err != nil {
+		return "", err
+	}
+	return string(jsonData), nil
 }
 
 func main() {
